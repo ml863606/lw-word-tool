@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="Ribbon_Load">
+  <ribbon>
+    <tabs>
+      <tab id="tabFormatAssistant" label="排版小助手">
+        <group id="grpCore" label="核心功能">
+          <button id="btnAutoFormat" label="一键排版" size="large" onAction="OnAutoFormat" imageMso="AutoFormat" />
+          <button id="btnShowPanel" label="大纲确认面板" size="large" onAction="OnShowPanel" imageMso="OutlineView" />
+        </group>
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>

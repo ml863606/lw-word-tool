@@ -1,0 +1,10 @@
+# VS 缓存
+.vs/
+*.suo
+*.vsidx
+*.vssscc
+# C# 编译输出
+bin/
+obj/
+# Office VSTO 临时密钥（不要提交私钥证书）
+*.pfx
