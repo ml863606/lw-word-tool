@@ -31,6 +31,7 @@ namespace WordTool.UI
             AddContextMenuItem("设为 三级标题 (Heading 3)", ParagraphRole.Heading3);
             AddContextMenuItem("设为 参考文献 (Reference)", ParagraphRole.Reference);
             AddContextMenuItem("设为 图表题注 (Caption)", ParagraphRole.Caption);
+            AddContextMenuItem("设为 表注 (TableNote)", ParagraphRole.TableNote);
             _contextMenu.Items.Add(new ToolStripSeparator());
             AddContextMenuItem("设为 普通正文 (Normal)", ParagraphRole.Normal);
 
@@ -127,6 +128,9 @@ namespace WordTool.UI
                     break;
                 case ParagraphRole.Caption:
                     node.ForeColor = Color.DarkMagenta;
+                    break;
+                case ParagraphRole.TableNote:
+                    node.ForeColor = Color.DarkOrange;
                     break;
                 case ParagraphRole.Normal:
                     node.ForeColor = Color.Gray;

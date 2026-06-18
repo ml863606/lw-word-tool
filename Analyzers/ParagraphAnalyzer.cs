@@ -8,15 +8,17 @@ namespace WordTool.Analyzers
 {
     public class ParagraphAnalyzer
     {
-        public List<AnalyzedParagraph> Analyze(Word.Document doc, int startSectionIndex = 2)
+        public List<AnalyzedParagraph> Analyze(Word.Document doc, int startSectionIndex = 2, Action checkStatus = null)
         {
             List<AnalyzedParagraph> results = new List<AnalyzedParagraph>();
 
             for (int i = startSectionIndex; i <= doc.Sections.Count; i++)
             {
+                checkStatus?.Invoke();
                 Word.Section section = doc.Sections[i];
                 foreach (Word.Paragraph para in section.Range.Paragraphs)
                 {
+                    checkStatus?.Invoke();
                     AnalyzedParagraph analyzed = AnalyzeSingleParagraph(para);
                     if (analyzed != null)
                     {
@@ -50,6 +52,12 @@ namespace WordTool.Analyzers
             if ((text.StartsWith("图") || text.StartsWith("表")) && text.Length < 30 && Regex.IsMatch(text, @"^(图|表)\s*\d+[-_.]\d+"))
             {
                 role = ParagraphRole.Caption;
+                confidence = 0.9f;
+            }
+            // 表注判断: 注：，说明：
+            else if ((text.StartsWith("注") || text.StartsWith("说明") || text.StartsWith("Note") || text.StartsWith("note")) && text.Length < 100 && Regex.IsMatch(text, @"^(注(意|释)?|说明|Note|note)\s*[:：]"))
+            {
+                role = ParagraphRole.TableNote;
                 confidence = 0.9f;
             }
             // 参考文献判断

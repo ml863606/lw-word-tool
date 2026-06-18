@@ -14,6 +14,13 @@ namespace WordTool.UI
         private System.Windows.Forms.Button btnLayout;
         private System.Windows.Forms.RichTextBox txtLog;
         private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Panel panelTemplate;
+        private System.Windows.Forms.Label lblTemplate;
+        private System.Windows.Forms.ComboBox cmbTemplate;
+        private System.Windows.Forms.Button btnEditTemplate;
+        private System.Windows.Forms.Panel panelExecutionControl;
+        private System.Windows.Forms.Button btnPause;
+        private System.Windows.Forms.Button btnStop;
 
         protected override void Dispose(bool disposing)
         {
@@ -37,10 +44,18 @@ namespace WordTool.UI
             this.btnLayout = new System.Windows.Forms.Button();
             this.txtLog = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.panelTemplate = new System.Windows.Forms.Panel();
+            this.lblTemplate = new System.Windows.Forms.Label();
+            this.cmbTemplate = new System.Windows.Forms.ComboBox();
+            this.btnEditTemplate = new System.Windows.Forms.Button();
+            this.panelExecutionControl = new System.Windows.Forms.Panel();
+            this.btnPause = new System.Windows.Forms.Button();
+            this.btnStop = new System.Windows.Forms.Button();
             
             this.tabControl1.SuspendLayout();
             this.tabPageAuto.SuspendLayout();
             this.tabPageManual.SuspendLayout();
+            this.panelTemplate.SuspendLayout();
             this.SuspendLayout();
 
             // tabControl1
@@ -106,15 +121,66 @@ namespace WordTool.UI
             this.progressBar1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.progressBar1.Height = 20;
 
+            // panelTemplate
+            this.panelTemplate.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelTemplate.Height = 35;
+            this.panelTemplate.Padding = new System.Windows.Forms.Padding(5);
+            this.panelTemplate.Controls.Add(this.cmbTemplate);
+            this.panelTemplate.Controls.Add(this.btnEditTemplate);
+            this.panelTemplate.Controls.Add(this.lblTemplate);
+
+            // lblTemplate
+            this.lblTemplate.Text = "选择模板:";
+            this.lblTemplate.Dock = System.Windows.Forms.DockStyle.Left;
+            this.lblTemplate.Width = 65;
+            this.lblTemplate.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+
+            // btnEditTemplate
+            this.btnEditTemplate.Text = "⚙️ 配置";
+            this.btnEditTemplate.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnEditTemplate.Width = 55;
+            this.btnEditTemplate.Click += new System.EventHandler(this.btnEditTemplate_Click);
+
+            // panelExecutionControl
+            this.panelExecutionControl.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelExecutionControl.Height = 40;
+            this.panelExecutionControl.Padding = new System.Windows.Forms.Padding(10, 5, 10, 5);
+            this.panelExecutionControl.Controls.Add(this.btnPause);
+            this.panelExecutionControl.Controls.Add(this.btnStop);
+            this.panelExecutionControl.BackColor = System.Drawing.Color.FromArgb(245, 247, 250);
+
+            // btnPause
+            this.btnPause.Text = "⏸️ 暂停";
+            this.btnPause.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnPause.Width = 120;
+            this.btnPause.Enabled = false;
+            this.btnPause.Click += new System.EventHandler(this.btnPause_Click);
+
+            // btnStop
+            this.btnStop.Text = "⏹️ 中止";
+            this.btnStop.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnStop.Width = 120;
+            this.btnStop.Enabled = false;
+            this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
+
+            // cmbTemplate
+            this.cmbTemplate.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cmbTemplate.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+
             // MainPanelControl
             this.Controls.Add(this.txtLog);
             this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.panelExecutionControl);
             this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.panelTemplate);
             this.Size = new System.Drawing.Size(300, 600);
+            this.Font = new System.Drawing.Font("Microsoft YaHei", 9.5f);
 
             this.tabControl1.ResumeLayout(false);
             this.tabPageAuto.ResumeLayout(false);
             this.tabPageManual.ResumeLayout(false);
+            this.panelTemplate.ResumeLayout(false);
+            this.panelExecutionControl.ResumeLayout(false);
             this.ResumeLayout(false);
         }
     }

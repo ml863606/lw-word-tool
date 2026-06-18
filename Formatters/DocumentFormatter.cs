@@ -6,11 +6,12 @@ namespace WordTool.Formatters
 {
     public class DocumentFormatter
     {
-        public void ApplyFormatting(List<AnalyzedParagraph> paragraphs, System.Action<string> logger = null)
+        public void ApplyFormatting(List<AnalyzedParagraph> paragraphs, System.Action<string> logger = null, System.Action checkStatus = null)
         {
             logger?.Invoke($"正在清除 {paragraphs.Count} 个段落的残留直接格式，并重新赋予规范样式...");
             foreach (var item in paragraphs)
             {
+                checkStatus?.Invoke();
                 Word.Paragraph para = item.Paragraph;
                 
                 // 1. 清除直接格式
@@ -34,6 +35,9 @@ namespace WordTool.Formatters
                         break;
                     case ParagraphRole.Caption:
                         para.set_Style(Word.WdBuiltinStyle.wdStyleCaption);
+                        break;
+                    case ParagraphRole.TableNote:
+                        try { para.set_Style("表注_Auto"); } catch { para.set_Style(Word.WdBuiltinStyle.wdStyleNormal); }
                         break;
                     case ParagraphRole.Normal:
                     default:

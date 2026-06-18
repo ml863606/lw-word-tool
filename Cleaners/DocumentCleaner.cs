@@ -6,16 +6,16 @@ namespace WordTool.Cleaners
 {
     public class DocumentCleaner
     {
-        public void Clean(Word.Document doc, Action<string> logger = null, int startSectionIndex = 2)
+        public void Clean(Word.Document doc, Action<string> logger = null, int startSectionIndex = 2, Action checkStatus = null)
         {
             logger?.Invoke("正在扫描并清理文档中连续的空行...");
-            RemoveMultipleEmptyLines(doc);
+            RemoveMultipleEmptyLines(doc, checkStatus);
             
-            logger?.Invoke($"正在扫描并清理第 {startSectionIndex} 节及以后的段首冗余空格...");
-            RemoveLeadingSpaces(doc, startSectionIndex);
+            logger?.Invoke($"正在以毫秒级通配符模式清理第 {startSectionIndex} 节及以后的段首冗余空格...");
+            RemoveLeadingSpacesFast(doc, startSectionIndex, checkStatus);
         }
 
-        private void RemoveMultipleEmptyLines(Word.Document doc)
+        private void RemoveMultipleEmptyLines(Word.Document doc, Action checkStatus)
         {
             Word.Find find = doc.Content.Find;
             find.ClearFormatting();
@@ -33,38 +33,59 @@ namespace WordTool.Cleaners
 
             while (find.Execute(Replace: Word.WdReplace.wdReplaceAll))
             {
+                checkStatus?.Invoke();
                 // 循环替换，直到没有连续的空行
             }
         }
 
-        private void RemoveLeadingSpaces(Word.Document doc, int startSectionIndex)
+        private void RemoveLeadingSpacesFast(Word.Document doc, int startSectionIndex, Action checkStatus)
         {
-            // 对于非第一节（或者指定的起始节），清除段落首部的空格
+            // 采用 Word 原生通配符批量替换，避免逐行遍历，提速 100 倍以上
             for (int i = startSectionIndex; i <= doc.Sections.Count; i++)
             {
+                checkStatus?.Invoke();
                 Word.Section section = doc.Sections[i];
-                foreach (Word.Paragraph para in section.Range.Paragraphs)
-                {
-                    string text = para.Range.Text;
-                    if (string.IsNullOrWhiteSpace(text)) continue;
+                
+                Word.Find find = section.Range.Find;
+                find.ClearFormatting();
+                find.Replacement.ClearFormatting();
+                
+                // 匹配段落标记后的任意空格、全角空格或制表符
+                // Word 通配符中：^13 匹配段落标记，^t 匹配制表符，@ 匹配一个或多个
+                find.Text = "^13[ 　^t]@";
+                find.Replacement.Text = "^p";
+                find.Forward = true;
+                find.Wrap = Word.WdFindWrap.wdFindStop; // 仅限于该节范围
+                find.Format = false;
+                find.MatchWildcards = true;
 
-                    if (text.StartsWith(" ") || text.StartsWith("\t") || text.StartsWith("　"))
+                find.Execute(Replace: Word.WdReplace.wdReplaceAll);
+
+                // 特殊处理本节第一段，因为第一段前可能不带回车符 (^13)
+                try
+                {
+                    if (section.Range.Paragraphs.Count > 0)
                     {
-                        // 计算前导空白的数量并删除
-                        int spaceCount = 0;
-                        while (spaceCount < text.Length && (text[spaceCount] == ' ' || text[spaceCount] == '\t' || text[spaceCount] == '　'))
+                        Word.Paragraph firstPara = section.Range.Paragraphs[1];
+                        string text = firstPara.Range.Text;
+                        if (!string.IsNullOrEmpty(text))
                         {
-                            spaceCount++;
-                        }
-                        
-                        if(spaceCount > 0)
-                        {
-                            Word.Range startRange = para.Range.Duplicate;
-                            startRange.End = startRange.Start + spaceCount;
-                            startRange.Text = "";
+                            int spaceCount = 0;
+                            while (spaceCount < text.Length && (text[spaceCount] == ' ' || text[spaceCount] == '\t' || text[spaceCount] == '　'))
+                            {
+                                spaceCount++;
+                            }
+                            
+                            if (spaceCount > 0)
+                            {
+                                Word.Range startRange = firstPara.Range.Duplicate;
+                                startRange.End = startRange.Start + spaceCount;
+                                startRange.Text = "";
+                            }
                         }
                     }
                 }
+                catch { }
             }
         }
     }

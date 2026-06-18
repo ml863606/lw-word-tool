@@ -54,6 +54,17 @@ namespace WordTool.UI
             if (control != null)
             {
                 var workflow = new FormatWorkflow(doc, control.LogMessage, control.UpdateProgress);
+                workflow.YieldUICallback = () =>
+                {
+                    try
+                    {
+                        if (control != null && !control.IsDisposed && control.IsHandleCreated)
+                        {
+                            control.Invoke(new Action(() => System.Windows.Forms.Application.DoEvents()));
+                        }
+                    }
+                    catch { }
+                };
                 control.BindWorkflow(workflow);
                 control.SelectTab(showAutoTab);
             }

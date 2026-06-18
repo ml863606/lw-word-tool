@@ -194,6 +194,7 @@
     </Compile>
     <Compile Include="Models\ParagraphRole.cs" />
     <Compile Include="Models\AnalyzedParagraph.cs" />
+    <Compile Include="Models\FormattingTemplate.cs" />
     <Compile Include="Cleaners\DocumentCleaner.cs" />
     <Compile Include="Styles\StyleManager.cs" />
     <Compile Include="Analyzers\ParagraphAnalyzer.cs" />
@@ -204,6 +205,9 @@
       <DependentUpon>OutlineControl.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\OutlineConfirmForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\TemplateEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\TaskPaneManager.cs" />

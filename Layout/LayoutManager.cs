@@ -1,18 +1,24 @@
 using Word = Microsoft.Office.Interop.Word;
+using WordTool.Models;
 
 namespace WordTool.Layout
 {
     public class LayoutManager
     {
-        public void UpdateOrInsertTOC(Word.Document doc, System.Action<string> logger = null)
+        public void UpdateOrInsertTOC(Word.Document doc, FormattingTemplate template, System.Action<string> logger = null, System.Action checkStatus = null)
         {
+            if (template == null) return;
+            checkStatus?.Invoke();
+
             if (doc.TablesOfContents.Count > 0)
             {
-                logger?.Invoke($"发现已有目录，正在更新页码...");
-                // 更新现有目录
-                foreach (Word.TableOfContents toc in doc.TablesOfContents)
+                if (template.TocAutoUpdate)
                 {
-                    toc.Update();
+                    logger?.Invoke($"发现已有目录，正在更新页码...");
+                    foreach (Word.TableOfContents toc in doc.TablesOfContents)
+                    {
+                        toc.Update();
+                    }
                 }
             }
             else
@@ -30,7 +36,7 @@ namespace WordTool.Layout
                     range,
                     UseHeadingStyles: true,
                     UpperHeadingLevel: 1,
-                    LowerHeadingLevel: 3,
+                    LowerHeadingLevel: template.TocLevels,
                     UseHyperlinks: true,
                     HidePageNumbersInWeb: true,
                     UseOutlineLevels: true);
