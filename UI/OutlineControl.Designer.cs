@@ -6,6 +6,7 @@ namespace WordTool.UI
         private System.Windows.Forms.TreeView treeViewOutline;
         private System.Windows.Forms.Button btnConfirm;
         private System.Windows.Forms.Panel panelTop;
+        private System.Windows.Forms.CheckBox chkShowAll;
 
         protected override void Dispose(bool disposing)
         {
@@ -21,20 +22,21 @@ namespace WordTool.UI
             this.treeViewOutline = new System.Windows.Forms.TreeView();
             this.btnConfirm = new System.Windows.Forms.Button();
             this.panelTop = new System.Windows.Forms.Panel();
+            this.chkShowAll = new System.Windows.Forms.CheckBox();
             this.panelTop.SuspendLayout();
             this.SuspendLayout();
             // 
             // treeViewOutline
             // 
             this.treeViewOutline.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeViewOutline.Location = new System.Drawing.Point(0, 40);
+            this.treeViewOutline.Location = new System.Drawing.Point(0, 70);
             this.treeViewOutline.Name = "treeViewOutline";
-            this.treeViewOutline.Size = new System.Drawing.Size(250, 410);
+            this.treeViewOutline.Size = new System.Drawing.Size(250, 380);
             this.treeViewOutline.TabIndex = 0;
             // 
             // btnConfirm
             // 
-            this.btnConfirm.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnConfirm.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnConfirm.Location = new System.Drawing.Point(5, 5);
             this.btnConfirm.Name = "btnConfirm";
             this.btnConfirm.Size = new System.Drawing.Size(240, 30);
@@ -43,14 +45,25 @@ namespace WordTool.UI
             this.btnConfirm.UseVisualStyleBackColor = true;
             this.btnConfirm.Click += new System.EventHandler(this.btnConfirm_Click);
             // 
+            // chkShowAll
+            // 
+            this.chkShowAll.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.chkShowAll.Location = new System.Drawing.Point(5, 40);
+            this.chkShowAll.Name = "chkShowAll";
+            this.chkShowAll.Size = new System.Drawing.Size(240, 25);
+            this.chkShowAll.TabIndex = 2;
+            this.chkShowAll.Text = "显示所有段落（含普通正文）";
+            this.chkShowAll.UseVisualStyleBackColor = true;
+            // 
             // panelTop
             // 
+            this.panelTop.Controls.Add(this.chkShowAll);
             this.panelTop.Controls.Add(this.btnConfirm);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
             this.panelTop.Padding = new System.Windows.Forms.Padding(5);
-            this.panelTop.Size = new System.Drawing.Size(250, 40);
+            this.panelTop.Size = new System.Drawing.Size(250, 70);
             this.panelTop.TabIndex = 2;
             // 
             // OutlineControl

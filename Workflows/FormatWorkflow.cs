@@ -18,7 +18,7 @@ namespace WordTool.Workflows
             _progress = progress ?? (pct => { });
         }
 
-        public void RunAllSteps()
+        public void RunAllSteps(Func<List<AnalyzedParagraph>, bool> confirmCallback = null)
         {
             try
             {
@@ -32,6 +32,18 @@ namespace WordTool.Workflows
 
                 _progress(50);
                 var paragraphs = RunAnalysis();
+
+                if (confirmCallback != null)
+                {
+                    _logger("正在等待大纲确认...");
+                    bool confirmed = confirmCallback(paragraphs);
+                    if (!confirmed)
+                    {
+                        _logger("【取消】用户取消了排版操作。");
+                        _progress(0);
+                        return;
+                    }
+                }
 
                 _progress(70);
                 RunFormatting(paragraphs);

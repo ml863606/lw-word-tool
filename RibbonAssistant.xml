@@ -4,8 +4,8 @@
     <tabs>
       <tab id="tabFormatAssistant" label="排版小助手">
         <group id="grpCore" label="核心功能">
-          <button id="btnAutoFormat" label="一键排版" size="large" onAction="OnAutoFormat" imageMso="AutoFormat" />
-          <button id="btnShowPanel" label="大纲确认面板" size="large" onAction="OnShowPanel" imageMso="OutlineView" />
+          <button id="btnAutoFormat" label="自动排版" size="large" onAction="OnAutoFormat" imageMso="AutoFormat" />
+          <button id="btnManualFormat" label="分步骤排版" size="large" onAction="OnManualFormat" imageMso="OutlineView" />
         </group>
       </tab>
     </tabs>

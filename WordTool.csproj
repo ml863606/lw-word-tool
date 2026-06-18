@@ -203,6 +203,9 @@
     <Compile Include="UI\OutlineControl.Designer.cs">
       <DependentUpon>OutlineControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="UI\OutlineConfirmForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="UI\TaskPaneManager.cs" />
     <Compile Include="Formatters\DocumentFormatter.cs" />
     <Compile Include="Formatters\MediaFormatter.cs" />

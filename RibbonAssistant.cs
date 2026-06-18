@@ -36,13 +36,13 @@ namespace WordTool
         public void OnAutoFormat(Office.IRibbonControl control)
         {
             var doc = Globals.ThisAddIn.Application.ActiveDocument;
-            Globals.ThisAddIn.PaneManager.ShowMainPanel(doc);
+            Globals.ThisAddIn.PaneManager.ShowMainPanel(doc, true);
         }
 
-        public void OnShowPanel(Office.IRibbonControl control)
+        public void OnManualFormat(Office.IRibbonControl control)
         {
             var doc = Globals.ThisAddIn.Application.ActiveDocument;
-            Globals.ThisAddIn.PaneManager.ShowMainPanel(doc);
+            Globals.ThisAddIn.PaneManager.ShowMainPanel(doc, false);
         }
 
         #endregion

@@ -18,6 +18,18 @@ namespace WordTool.UI
             _workflow = workflow;
         }
 
+        public void SelectTab(bool autoTab)
+        {
+            if (autoTab)
+            {
+                tabControl1.SelectedTab = tabPageAuto;
+            }
+            else
+            {
+                tabControl1.SelectedTab = tabPageManual;
+            }
+        }
+
         public void LogMessage(string message)
         {
             if (this.InvokeRequired)
@@ -43,40 +55,143 @@ namespace WordTool.UI
         {
             txtLog.Clear();
             btnRunAll.Enabled = false;
+            progressBar1.Value = 0;
+            
             // Background thread to not freeze UI
             System.Threading.Tasks.Task.Run(() =>
             {
-                _workflow?.RunAllSteps();
-                this.Invoke(new Action(() => btnRunAll.Enabled = true));
+                try
+                {
+                    _workflow?.RunAllSteps(paragraphs =>
+                    {
+                        bool confirmed = false;
+                        this.Invoke(new Action(() =>
+                        {
+                            using (var confirmForm = new OutlineConfirmForm())
+                            {
+                                confirmForm.LoadData(paragraphs);
+                                var result = confirmForm.ShowDialog(this);
+                                if (result == DialogResult.OK)
+                                {
+                                    confirmed = true;
+                                }
+                            }
+                        }));
+                        return confirmed;
+                    });
+                }
+                finally
+                {
+                    this.Invoke(new Action(() => btnRunAll.Enabled = true));
+                }
             });
         }
 
         private void btnClean_Click(object sender, EventArgs e)
         {
-            _workflow?.RunCleanData();
+            btnClean.Enabled = false;
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    _workflow?.RunCleanData();
+                }
+                finally
+                {
+                    this.Invoke(new Action(() => btnClean.Enabled = true));
+                }
+            });
         }
 
         private void btnStyle_Click(object sender, EventArgs e)
         {
-            _workflow?.RunStyleRebuild();
+            btnStyle.Enabled = false;
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    _workflow?.RunStyleRebuild();
+                }
+                finally
+                {
+                    this.Invoke(new Action(() => btnStyle.Enabled = true));
+                }
+            });
         }
 
         private void btnAnalyze_Click(object sender, EventArgs e)
         {
-            var paragraphs = _workflow?.RunAnalysis();
-            // 在实际产品中，这里可能需要弹出 OutlineControl 进行确认
-            // 为了简单演示，我们直接接着排版正文
-            _workflow?.RunFormatting(paragraphs);
+            if (_workflow == null) return;
+            btnAnalyze.Enabled = false;
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    var paragraphs = _workflow.RunAnalysis();
+                    bool confirmed = false;
+                    this.Invoke(new Action(() =>
+                    {
+                        using (var confirmForm = new OutlineConfirmForm())
+                        {
+                            confirmForm.LoadData(paragraphs);
+                            var result = confirmForm.ShowDialog(this);
+                            if (result == DialogResult.OK)
+                            {
+                                confirmed = true;
+                            }
+                        }
+                    }));
+
+                    if (confirmed)
+                    {
+                        _workflow.RunFormatting(paragraphs);
+                    }
+                    else
+                    {
+                        LogMessage("【取消】已取消正文套用样式。");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogMessage($"【错误】分步解析排版失败: {ex.Message}");
+                }
+                finally
+                {
+                    this.Invoke(new Action(() => btnAnalyze.Enabled = true));
+                }
+            });
         }
 
         private void btnMedia_Click(object sender, EventArgs e)
         {
-            _workflow?.RunMediaFormatting();
+            btnMedia.Enabled = false;
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    _workflow?.RunMediaFormatting();
+                }
+                finally
+                {
+                    this.Invoke(new Action(() => btnMedia.Enabled = true));
+                }
+            });
         }
 
         private void btnLayout_Click(object sender, EventArgs e)
         {
-            _workflow?.RunLayout();
+            btnLayout.Enabled = false;
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    _workflow?.RunLayout();
+                }
+                finally
+                {
+                    this.Invoke(new Action(() => btnLayout.Enabled = true));
+                }
+            });
         }
     }
 }
