@@ -13,18 +13,26 @@ namespace WordTool.Styles
             checkStatus?.Invoke();
             logger?.Invoke("正在设置纸张大小和全局页边距...");
             SetupPage(doc, template);
+            logger?.Invoke($"【页面设置】纸张: {template.PaperSize}；页边距: 上 {template.TopMarginCm:0.##}cm / 下 {template.BottomMarginCm:0.##}cm / 左 {template.LeftMarginCm:0.##}cm / 右 {template.RightMarginCm:0.##}cm");
             
             checkStatus?.Invoke();
             logger?.Invoke("正在重塑全局【正文】基础样式...");
             RebuildNormalStyle(doc, template);
+            logger?.Invoke($"【样式重建】正文 -> {template.NormalFontNameFarEast}/{template.NormalFontNameAscii} {template.NormalFontSize:0.#}pt，{template.NormalLineSpacingRule}，首行缩进 {template.NormalFirstLineIndentChars:0.#} 字符，两端对齐，段前/段后 0pt");
             
             checkStatus?.Invoke();
             logger?.Invoke("正在重新定义各级标题的大纲格式...");
             RebuildHeadingStyles(doc, template);
+            logger?.Invoke($"【样式重建】标题 1 -> {template.H1FontNameFarEast}/{template.NormalFontNameAscii} {template.H1FontSize:0.#}pt，{BoldText(template.H1Bold)}，{template.H1Alignment}，段前 {template.H1SpaceBefore:0.#}pt，段后 {template.H1SpaceAfter:0.#}pt，保持与下段同页");
+            logger?.Invoke($"【样式重建】标题 2 -> {template.H2FontNameFarEast}/{template.NormalFontNameAscii} {template.H2FontSize:0.#}pt，{BoldText(template.H2Bold)}，{template.H2Alignment}，段前 {template.H2SpaceBefore:0.#}pt，段后 {template.H2SpaceAfter:0.#}pt，保持与下段同页");
+            logger?.Invoke($"【样式重建】标题 3 -> {template.H3FontNameFarEast}/{template.NormalFontNameAscii} {template.H3FontSize:0.#}pt，{BoldText(template.H3Bold)}，{template.H3Alignment}，保持与下段同页");
             
             checkStatus?.Invoke();
             logger?.Invoke("正在配置【题注】和【参考文献】特殊样式...");
             RebuildSpecialStyles(doc, template);
+            logger?.Invoke($"【样式重建】参考文献_Auto -> {template.RefFontSize:0.#}pt，首行缩进 {template.RefFirstLineIndentCm:0.##}cm，左缩进 {template.RefLeftIndentCm:0.##}cm");
+            logger?.Invoke($"【样式重建】题注 -> 宋体/Times New Roman {template.CaptionFontSize:0.#}pt，{BoldText(template.CaptionBold)}，{template.CaptionAlignment}");
+            logger?.Invoke($"【样式重建】表注_Auto -> {template.NoteFontNameFarEast}/{template.NormalFontNameAscii} {template.NoteFontSize:0.#}pt，{template.NoteAlignment}");
         }
 
         private void SetupPage(Word.Document doc, FormattingTemplate template)
@@ -156,6 +164,11 @@ namespace WordTool.Styles
             noteStyle.ParagraphFormat.Alignment = (Word.WdParagraphAlignment)template.NoteAlignment;
             noteStyle.ParagraphFormat.FirstLineIndent = 0;
             noteStyle.ParagraphFormat.CharacterUnitFirstLineIndent = 0;
+        }
+
+        private string BoldText(bool isBold)
+        {
+            return isBold ? "加粗" : "不加粗";
         }
     }
 }

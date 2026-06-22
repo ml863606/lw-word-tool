@@ -10,19 +10,28 @@ namespace WordTool.Analyzers
     {
         public List<AnalyzedParagraph> Analyze(Word.Document doc, int startSectionIndex = 2, Action checkStatus = null)
         {
+            return Analyze(doc, startSectionIndex, null, checkStatus);
+        }
+
+        public List<AnalyzedParagraph> Analyze(Word.Document doc, int startSectionIndex, Action<string> logger = null, Action checkStatus = null)
+        {
             List<AnalyzedParagraph> results = new List<AnalyzedParagraph>();
+            int index = 0;
 
             for (int i = startSectionIndex; i <= doc.Sections.Count; i++)
             {
                 checkStatus?.Invoke();
                 Word.Section section = doc.Sections[i];
+                logger?.Invoke($"【段落解析】开始扫描第 {i} 节，共 {section.Range.Paragraphs.Count} 个段落");
                 foreach (Word.Paragraph para in section.Range.Paragraphs)
                 {
                     checkStatus?.Invoke();
                     AnalyzedParagraph analyzed = AnalyzeSingleParagraph(para);
                     if (analyzed != null)
                     {
+                        index++;
                         results.Add(analyzed);
+                        logger?.Invoke($"【段落解析】第 {index} 段 “{TrimForLog(analyzed.TextContent, 80)}” -> {RoleDisplayName(analyzed.Role)}，置信度 {analyzed.Confidence:P0}");
                     }
                 }
             }
@@ -103,6 +112,29 @@ namespace WordTool.Analyzers
             }
 
             return new AnalyzedParagraph(para, role, text, confidence);
+        }
+
+        private string RoleDisplayName(ParagraphRole role)
+        {
+            switch (role)
+            {
+                case ParagraphRole.Heading1: return "一级标题";
+                case ParagraphRole.Heading2: return "二级标题";
+                case ParagraphRole.Heading3: return "三级标题";
+                case ParagraphRole.Reference: return "参考文献";
+                case ParagraphRole.Caption: return "图表题注";
+                case ParagraphRole.TableNote: return "表注";
+                case ParagraphRole.Normal: return "正文";
+                default: return "未知类型";
+            }
+        }
+
+        private string TrimForLog(string text, int maxLength)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return "(空文本)";
+            string normalized = text.Replace("\r", "").Replace("\n", "").Replace("\t", " ").Trim();
+            if (normalized.Length <= maxLength) return normalized;
+            return normalized.Substring(0, maxLength) + "...";
         }
     }
 }

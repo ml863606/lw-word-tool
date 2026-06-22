@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Xml.Serialization;
 using System.Collections.Generic;
+using System.Text;
 using WordTool.Models;
 
 namespace WordTool.UI
@@ -13,12 +14,16 @@ namespace WordTool.UI
         private Workflows.FormatWorkflow _workflow;
         private List<FormattingTemplate> _templates = new List<FormattingTemplate>();
         private string _configPath;
+        private readonly object _logLock = new object();
+        private readonly Queue<string> _pendingLogs = new Queue<string>();
+        private Timer _logFlushTimer;
         
         public MainPanelControl()
         {
             InitializeComponent();
             InitializeTemplates();
             this.cmbTemplate.SelectedIndexChanged += CmbTemplate_SelectedIndexChanged;
+            InitializeLogBuffer();
         }
 
         public void BindWorkflow(Workflows.FormatWorkflow workflow)
@@ -170,13 +175,21 @@ namespace WordTool.UI
 
         public void LogMessage(string message)
         {
-            if (this.InvokeRequired)
+            string line = $"[{DateTime.Now:HH:mm:ss}] {message}{Environment.NewLine}";
+            lock (_logLock)
             {
-                this.Invoke(new Action<string>(LogMessage), message);
+                _pendingLogs.Enqueue(line);
+            }
+
+            if (!IsHandleCreated || IsDisposed)
+            {
                 return;
             }
-            txtLog.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}{Environment.NewLine}");
-            txtLog.ScrollToCaret();
+
+            if (!this.InvokeRequired)
+            {
+                FlushLogBuffer();
+            }
         }
 
         public void UpdateProgress(int percent)
@@ -210,6 +223,39 @@ namespace WordTool.UI
             }
         }
 
+        private void InitializeLogBuffer()
+        {
+            _logFlushTimer = new Timer();
+            _logFlushTimer.Interval = 200;
+            _logFlushTimer.Tick += (sender, args) => FlushLogBuffer();
+            _logFlushTimer.Start();
+        }
+
+        private void FlushLogBuffer()
+        {
+            if (!IsHandleCreated || this.IsDisposed || txtLog.IsDisposed) return;
+
+            if (this.InvokeRequired)
+            {
+                BeginInvoke(new Action(FlushLogBuffer));
+                return;
+            }
+
+            StringBuilder builder = null;
+            lock (_logLock)
+            {
+                if (_pendingLogs.Count == 0) return;
+                builder = new StringBuilder();
+                while (_pendingLogs.Count > 0)
+                {
+                    builder.Append(_pendingLogs.Dequeue());
+                }
+            }
+
+            txtLog.AppendText(builder.ToString());
+            txtLog.ScrollToCaret();
+        }
+
         private void btnPause_Click(object sender, EventArgs e)
         {
             if (_workflow == null) return;
@@ -240,6 +286,7 @@ namespace WordTool.UI
 
         private void btnRunAll_Click(object sender, EventArgs e)
         {
+            ClearLogBuffer();
             txtLog.Clear();
             SetExecutionState(true);
             _workflow?.ResetControlStates();
@@ -273,6 +320,14 @@ namespace WordTool.UI
                     SetExecutionState(false);
                 }
             });
+        }
+
+        private void ClearLogBuffer()
+        {
+            lock (_logLock)
+            {
+                _pendingLogs.Clear();
+            }
         }
 
         private void btnClean_Click(object sender, EventArgs e)

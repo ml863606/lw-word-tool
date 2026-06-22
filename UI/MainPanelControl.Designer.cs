@@ -26,6 +26,8 @@ namespace WordTool.UI
         {
             if (disposing && (components != null))
             {
+                _logFlushTimer?.Stop();
+                _logFlushTimer?.Dispose();
                 components.Dispose();
             }
             base.Dispose(disposing);

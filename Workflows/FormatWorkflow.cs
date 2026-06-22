@@ -202,7 +202,7 @@ namespace WordTool.Workflows
             {
                 CheckPauseAndCancel();
                 var analyzer = new Analyzers.ParagraphAnalyzer();
-                var result = analyzer.Analyze(_doc, checkStatus: CheckPauseAndCancel);
+                var result = analyzer.Analyze(_doc, 2, _logger, CheckPauseAndCancel);
                 _logger($"[解析段落角色] 完成，共识别到 {result.Count} 个段落。");
                 return result;
             }
@@ -230,7 +230,7 @@ namespace WordTool.Workflows
             {
                 CheckPauseAndCancel();
                 var formatter = new Formatters.DocumentFormatter();
-                formatter.ApplyFormatting(paragraphs, _logger, checkStatus: CheckPauseAndCancel);
+                formatter.ApplyFormatting(paragraphs, Template, _logger, checkStatus: CheckPauseAndCancel);
                 _logger("[应用正文排版] 完成。");
             }
             catch (OperationCanceledException)

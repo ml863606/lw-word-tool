@@ -10,11 +10,13 @@ namespace WordTool.Formatters
             if (template == null) return;
 
             logger?.Invoke($"正在扫描并格式化图片对象，共发现 {doc.InlineShapes.Count} 个...");
+            int imageIndex = 0;
             foreach (Word.InlineShape shape in doc.InlineShapes)
             {
                 checkStatus?.Invoke();
                 if (shape.Type == Word.WdInlineShapeType.wdInlineShapePicture)
                 {
+                    imageIndex++;
                     if (shape.Range.Paragraphs.Count > 0)
                     {
                         Word.Paragraph para = shape.Range.Paragraphs[1];
@@ -22,6 +24,11 @@ namespace WordTool.Formatters
                         para.Format.FirstLineIndent = 0;
                         para.Format.SpaceBefore = template.ImageSpaceBefore;
                         para.Format.SpaceAfter = template.ImageSpaceAfter;
+                        logger?.Invoke($"【图片排版】第 {imageIndex} 张图片 -> {template.ImageAlignment}，首行缩进 0，段前 {template.ImageSpaceBefore:0.#}pt，段后 {template.ImageSpaceAfter:0.#}pt");
+                    }
+                    else
+                    {
+                        logger?.Invoke($"【图片排版】第 {imageIndex} 张图片未找到所在段落，已跳过段落对齐设置");
                     }
                 }
             }
@@ -32,15 +39,20 @@ namespace WordTool.Formatters
             if (template == null) return;
 
             logger?.Invoke($"正在扫描并调整表格，共发现 {doc.Tables.Count} 个...");
+            int tableIndex = 0;
             foreach (Word.Table table in doc.Tables)
             {
                 checkStatus?.Invoke();
+                tableIndex++;
+                int cellCount = table.Range.Cells.Count;
+
                 // 设置自动调整
                 if (template.TableAutoFit)
                 {
                     table.AutoFitBehavior(Word.WdAutoFitBehavior.wdAutoFitWindow);
                 }
                 table.Rows.Alignment = (Word.WdRowAlignment)template.TableAlignment;
+                logger?.Invoke($"【表格排版】第 {tableIndex} 个表格 -> {template.TableAlignment}，自动适应窗口: {YesNo(template.TableAutoFit)}，单元格数: {cellCount}");
 
                 // 统计最大行索引以处理合并单元格情况
                 int maxRowIndex = 0;
@@ -57,12 +69,15 @@ namespace WordTool.Formatters
                 {
                     table.Borders.OutsideLineStyle = Word.WdLineStyle.wdLineStyleNone;
                     table.Borders.InsideLineStyle = Word.WdLineStyle.wdLineStyleNone;
+                    logger?.Invoke($"【表格排版】第 {tableIndex} 个表格 -> 已清除原边框，准备套用三线表");
                 }
 
                 // 遍历单元格，设置缩进、行距、字体、字号、加粗及三线表边框
+                int formattedCells = 0;
                 foreach (Word.Cell cell in table.Range.Cells)
                 {
                     checkStatus?.Invoke();
+                    formattedCells++;
                     cell.Range.ParagraphFormat.FirstLineIndent = doc.Application.CentimetersToPoints(template.TableTextFirstLineIndentCm);
                     cell.Range.ParagraphFormat.LineSpacingRule = (Word.WdLineSpacing)template.TableTextLineSpacingRule;
                     
@@ -108,7 +123,24 @@ namespace WordTool.Formatters
                         }
                     }
                 }
+
+                logger?.Invoke($"【表格排版】第 {tableIndex} 个表格 -> 已格式化 {formattedCells} 个单元格；正文 {template.TableTextFontName}/{template.NormalFontNameAscii} {template.TableTextSize:0.#}pt，{template.TableTextLineSpacingRule}，首行缩进 {template.TableTextFirstLineIndentCm:0.##}cm，标题行{BoldText(template.TableHeaderBold)}");
+
+                if (template.TableThreeLine)
+                {
+                    logger?.Invoke($"【表格排版】第 {tableIndex} 个表格 -> 三线表完成：上下边框 {template.TableTopBottomBorderWidth:0.##}pt，标题行下边框 {template.TableHeaderBottomBorderWidth:0.##}pt");
+                }
             }
+        }
+
+        private string YesNo(bool value)
+        {
+            return value ? "是" : "否";
+        }
+
+        private string BoldText(bool isBold)
+        {
+            return isBold ? "加粗" : "不加粗";
         }
 
         private Word.WdLineWidth GetWdLineWidth(float width)
