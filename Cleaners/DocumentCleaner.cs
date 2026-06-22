@@ -31,10 +31,15 @@ namespace WordTool.Cleaners
             find.MatchSoundsLike = false;
             find.MatchAllWordForms = false;
 
-            while (find.Execute(Replace: Word.WdReplace.wdReplaceAll))
+            // 限制最大执行 8 次，防止因尾部段落标记或表格内空行无法被 Word 物理删除而陷入死循环挂起
+            for (int k = 0; k < 8; k++)
             {
                 checkStatus?.Invoke();
-                // 循环替换，直到没有连续的空行
+                bool found = find.Execute(Replace: Word.WdReplace.wdReplaceAll);
+                if (!found)
+                {
+                    break;
+                }
             }
         }
 
