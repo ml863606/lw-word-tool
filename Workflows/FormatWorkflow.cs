@@ -251,9 +251,8 @@ namespace WordTool.Workflows
             try
             {
                 CheckPauseAndCancel();
-                var mediaFormatter = new Formatters.MediaFormatter();
-                mediaFormatter.FormatImages(_doc, Template, _logger, checkStatus: CheckPauseAndCancel);
-                mediaFormatter.FormatTables(_doc, Template, _logger, checkStatus: CheckPauseAndCancel);
+                RunImageFormattingCore();
+                RunTableFormattingCore();
                 _logger("[排版图片与表格] 完成。");
             }
             catch (OperationCanceledException)
@@ -265,6 +264,60 @@ namespace WordTool.Workflows
             {
                 OptimizeWordUI(false);
             }
+        }
+
+        public void RunImageFormatting()
+        {
+            _logger("开始执行 [图片样式]...");
+            OptimizeWordUI(true);
+            try
+            {
+                CheckPauseAndCancel();
+                RunImageFormattingCore();
+                _logger("[图片样式] 完成。");
+            }
+            catch (OperationCanceledException)
+            {
+                _logger("【终止】[图片样式] 被用户中止。");
+                throw;
+            }
+            finally
+            {
+                OptimizeWordUI(false);
+            }
+        }
+
+        public void RunTableFormatting()
+        {
+            _logger("开始执行 [表格样式]...");
+            OptimizeWordUI(true);
+            try
+            {
+                CheckPauseAndCancel();
+                RunTableFormattingCore();
+                _logger("[表格样式] 完成。");
+            }
+            catch (OperationCanceledException)
+            {
+                _logger("【终止】[表格样式] 被用户中止。");
+                throw;
+            }
+            finally
+            {
+                OptimizeWordUI(false);
+            }
+        }
+
+        private void RunImageFormattingCore()
+        {
+            var mediaFormatter = new Formatters.MediaFormatter();
+            mediaFormatter.FormatImages(_doc, Template, _logger, checkStatus: CheckPauseAndCancel);
+        }
+
+        private void RunTableFormattingCore()
+        {
+            var mediaFormatter = new Formatters.MediaFormatter();
+            mediaFormatter.FormatTables(_doc, Template, _logger, checkStatus: CheckPauseAndCancel);
         }
 
         public void RunLayout()

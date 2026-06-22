@@ -268,79 +268,103 @@ namespace WordTool.Models
         public ParagraphAlignmentOption NoteAlignment { get; set; }
 
 
-        // 图表表格
-        [Category("7. 图表与表格规范")]
+        // 图片样式
+        [Category("7. 图样式")]
         [DisplayName("图片对齐方式")]
         public ParagraphAlignmentOption ImageAlignment { get; set; }
 
-        [Category("7. 图表与表格规范")]
+        [Category("7. 图样式")]
         [DisplayName("图片段前间距 (磅)")]
         public float ImageSpaceBefore { get; set; }
 
-        [Category("7. 图表与表格规范")]
+        [Category("7. 图样式")]
         [DisplayName("图片段后间距 (磅)")]
         public float ImageSpaceAfter { get; set; }
 
-        [Category("7. 图表与表格规范")]
+        // 表格样式
+        [Category("8. 表格样式")]
+        [DisplayName("表格宽度 (%)")]
+        [Description("表格占页面可用宽度的百分比，默认 100 表示满宽")]
+        public float TableWidthPercent { get; set; }
+
+        [Category("8. 表格样式")]
         [DisplayName("表格对齐方式")]
         public RowAlignmentOption TableAlignment { get; set; }
 
-        [Category("7. 图表与表格规范")]
+        [Browsable(false)]
         [DisplayName("表格是否宽度自动适应窗口")]
         public bool TableAutoFit { get; set; }
 
-        [Category("7. 图表与表格规范")]
+        [Category("8. 表格样式")]
         [DisplayName("表格内容中文字体")]
         public string TableTextFontName { get; set; }
 
-        [Category("7. 图表与表格规范")]
+        [Category("8. 表格样式")]
         [DisplayName("表格内容字号")]
         [TypeConverter(typeof(FontSizeTypeConverter))]
         public float TableTextSize { get; set; }
 
-        [Category("7. 图表与表格规范")]
+        [Category("8. 表格样式")]
+        [DisplayName("表格内容对齐方式")]
+        [Description("表格单元格内文字的段落对齐方式，默认居中")]
+        public ParagraphAlignmentOption TableTextAlignment { get; set; }
+
+        [Category("8. 表格样式")]
         [DisplayName("表格内容行间距类型")]
         public LineSpacingOption TableTextLineSpacingRule { get; set; }
 
-        [Category("7. 图表与表格规范")]
+        [Category("8. 表格样式")]
         [DisplayName("表格内首行缩进 (厘米)")]
         [Description("表内文本一般不需要缩进，建议为 0.0")]
         public float TableTextFirstLineIndentCm { get; set; }
 
-        [Category("7. 图表与表格规范")]
+        [Category("8. 表格样式")]
         [DisplayName("是否启用三线表")]
         [Description("启用后表格将应用三线表格式（无竖线，上下边框较粗，标题行下方边框较细）")]
         public bool TableThreeLine { get; set; }
 
-        [Category("7. 图表与表格规范")]
-        [DisplayName("三线表上下边框磅值")]
-        [Description("上下边框的粗细，例如 1.5")]
+        [Browsable(false)]
         public float TableTopBottomBorderWidth { get; set; }
 
-        [Category("7. 图表与表格规范")]
-        [DisplayName("三线表中间（标题行下）边框磅值")]
-        [Description("标题行下方边框的粗细，例如 0.75")]
+        [Category("8. 表格样式")]
+        [DisplayName("三线表上边线宽度 (px)")]
+        [Description("三线表第一条线，默认 1.5")]
+        public float TableTopBorderWidth { get; set; }
+
+        [Category("8. 表格样式")]
+        [DisplayName("三线表中间线宽度 (px)")]
+        [Description("标题行下方第二条线，默认 0.75")]
         public float TableHeaderBottomBorderWidth { get; set; }
 
-        [Category("7. 图表与表格规范")]
+        [Category("8. 表格样式")]
+        [DisplayName("三线表下边线宽度 (px)")]
+        [Description("三线表第三条线，默认 1.5")]
+        public float TableBottomBorderWidth { get; set; }
+
+        [Category("8. 表格样式")]
         [DisplayName("表格标题行是否加粗")]
         [Description("表格第一行（标题行）内容是否加粗")]
         public bool TableHeaderBold { get; set; }
 
 
         // 目录
-        [Category("8. 目录辅助参数")]
+        [Category("9. 目录辅助参数")]
         [DisplayName("目录包含级数")]
         [Description("支持生成 1 - 3 级大纲目录")]
         public int TocLevels { get; set; }
 
-        [Category("8. 目录辅助参数")]
+        [Category("9. 目录辅助参数")]
         [DisplayName("自动更新页码")]
         [Description("排版时若已有目录是否自动更新")]
         public bool TocAutoUpdate { get; set; }
 
         public FormattingTemplate()
         {
+            TableWidthPercent = 100.0f;
+            TableTextAlignment = ParagraphAlignmentOption.居中对齐;
+            TableTopBorderWidth = 1.5f;
+            TableHeaderBottomBorderWidth = 0.75f;
+            TableBottomBorderWidth = 1.5f;
         }
 
         // 获取国内标准的“学位论文”默认模板 (GB/T 7713.1)
@@ -396,14 +420,18 @@ namespace WordTool.Models
                 ImageSpaceBefore = 6.0f,
                 ImageSpaceAfter = 6.0f,
 
+                TableWidthPercent = 100.0f,
                 TableAlignment = RowAlignmentOption.居中对齐,
                 TableAutoFit = true,
                 TableThreeLine = true,
                 TableTopBottomBorderWidth = 1.5f,
+                TableTopBorderWidth = 1.5f,
                 TableHeaderBottomBorderWidth = 0.75f,
+                TableBottomBorderWidth = 1.5f,
                 TableHeaderBold = true,
                 TableTextFontName = "宋体",
                 TableTextSize = 10.5f, // 五号
+                TableTextAlignment = ParagraphAlignmentOption.居中对齐,
                 TableTextLineSpacingRule = LineSpacingOption.单倍行距,
                 TableTextFirstLineIndentCm = 0.0f,
 
@@ -465,14 +493,18 @@ namespace WordTool.Models
                 ImageSpaceBefore = 6.0f,
                 ImageSpaceAfter = 6.0f,
 
+                TableWidthPercent = 100.0f,
                 TableAlignment = RowAlignmentOption.居中对齐,
                 TableAutoFit = true,
                 TableThreeLine = false,
                 TableTopBottomBorderWidth = 1.5f,
+                TableTopBorderWidth = 1.5f,
                 TableHeaderBottomBorderWidth = 0.75f,
+                TableBottomBorderWidth = 1.5f,
                 TableHeaderBold = false,
                 TableTextFontName = "仿宋_GB2312",
                 TableTextSize = 12.0f, // 小四
+                TableTextAlignment = ParagraphAlignmentOption.居中对齐,
                 TableTextLineSpacingRule = LineSpacingOption.单倍行距,
                 TableTextFirstLineIndentCm = 0.0f,
 

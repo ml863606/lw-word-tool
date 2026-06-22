@@ -11,6 +11,15 @@ namespace WordTool.UI
         private Button _btnSave;
         private Button _btnCancel;
         private Panel _btnPanel;
+        private Panel _headerPanel;
+        private Label _titleLabel;
+        private Label _subtitleLabel;
+        private readonly Color _wordBlue = Color.FromArgb(43, 87, 154);
+        private readonly Color _wordBlueDark = Color.FromArgb(31, 72, 136);
+        private readonly Color _surface = Color.FromArgb(248, 250, 252);
+        private readonly Color _border = Color.FromArgb(218, 225, 233);
+        private readonly Color _text = Color.FromArgb(31, 41, 55);
+        private readonly Color _mutedText = Color.FromArgb(99, 115, 129);
         
         public FormattingTemplate EditingTemplate { get; private set; }
 
@@ -19,6 +28,7 @@ namespace WordTool.UI
             EditingTemplate = CloneTemplate(templateToEdit);
             InitializeComponent();
             _propertyGrid.SelectedObject = EditingTemplate;
+            _propertyGrid.ExpandAllGridItems();
         }
 
         private void InitializeComponent()
@@ -27,44 +37,81 @@ namespace WordTool.UI
             this._btnSave = new Button();
             this._btnCancel = new Button();
             this._btnPanel = new Panel();
+            this._headerPanel = new Panel();
+            this._titleLabel = new Label();
+            this._subtitleLabel = new Label();
             
             this.SuspendLayout();
 
-            // 统一应用微软雅黑字体，大小设为 10.5 (小四) 解决字体太小难以看清的问题
-            var mainFont = new Font("Microsoft YaHei", 10.5f);
-            var boldFont = new Font("Microsoft YaHei", 10.5f, FontStyle.Bold);
+            var mainFont = new Font("Microsoft YaHei UI", 9.0f);
+            var titleFont = new Font("Microsoft YaHei UI", 11.0f, FontStyle.Bold);
+            var boldFont = new Font("Microsoft YaHei UI", 9.0f, FontStyle.Bold);
+
+            //
+            // _headerPanel
+            //
+            this._headerPanel.Dock = DockStyle.Top;
+            this._headerPanel.Height = 66;
+            this._headerPanel.BackColor = Color.White;
+            this._headerPanel.Padding = new Padding(18, 12, 18, 10);
+            this._headerPanel.Controls.Add(this._subtitleLabel);
+            this._headerPanel.Controls.Add(this._titleLabel);
+
+            //
+            // _titleLabel
+            //
+            this._titleLabel.Dock = DockStyle.Top;
+            this._titleLabel.Height = 24;
+            this._titleLabel.Text = "配置排版模板";
+            this._titleLabel.Font = titleFont;
+            this._titleLabel.ForeColor = _text;
+            this._titleLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+            //
+            // _subtitleLabel
+            //
+            this._subtitleLabel.Dock = DockStyle.Top;
+            this._subtitleLabel.Height = 20;
+            this._subtitleLabel.Text = EditingTemplate.Name;
+            this._subtitleLabel.Font = mainFont;
+            this._subtitleLabel.ForeColor = _mutedText;
+            this._subtitleLabel.TextAlign = ContentAlignment.MiddleLeft;
 
             // 
             // _propertyGrid
             // 
             this._propertyGrid.Dock = DockStyle.Fill;
-            this._propertyGrid.Location = new Point(0, 0);
+            this._propertyGrid.Location = new Point(0, 66);
             this._propertyGrid.Name = "_propertyGrid";
             this._propertyGrid.Size = new Size(580, 640);
             this._propertyGrid.TabIndex = 0;
-            this._propertyGrid.ToolbarVisible = false; // 隐藏工具栏，使布局更大气
+            this._propertyGrid.ToolbarVisible = false;
             
-            // 美化 PropertyGrid 视觉外观
-            this._propertyGrid.Font = new Font("Microsoft YaHei", 10.0f); // 网格列表字体大小
+            this._propertyGrid.Font = new Font("Microsoft YaHei UI", 9.0f);
             this._propertyGrid.ViewBackColor = Color.White;
-            this._propertyGrid.ViewForeColor = Color.FromArgb(50, 50, 50);
-            this._propertyGrid.CategoryForeColor = Color.FromArgb(0, 102, 204); // 分类名称颜色设为科技蓝
-            this._propertyGrid.CategorySplitterColor = Color.FromArgb(235, 235, 235);
-            this._propertyGrid.LineColor = Color.FromArgb(240, 240, 240); // 虚线设为更浅淡的灰
-            this._propertyGrid.HelpBackColor = Color.FromArgb(245, 247, 250); // 底部说明栏背景色
-            this._propertyGrid.HelpForeColor = Color.FromArgb(80, 80, 80);
+            this._propertyGrid.ViewForeColor = _text;
+            this._propertyGrid.CategoryForeColor = _wordBlue;
+            this._propertyGrid.CategorySplitterColor = _border;
+            this._propertyGrid.LineColor = Color.FromArgb(235, 239, 244);
+            this._propertyGrid.HelpBackColor = Color.FromArgb(243, 247, 252);
+            this._propertyGrid.HelpForeColor = _mutedText;
+            this._propertyGrid.BackColor = Color.White;
 
             // 
             // _btnSave
             // 
             this._btnSave.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             this._btnSave.Font = boldFont;
-            this._btnSave.Location = new Point(350, 9);
+            this._btnSave.Location = new Point(350, 12);
             this._btnSave.Name = "_btnSave";
-            this._btnSave.Size = new Size(100, 32);
+            this._btnSave.Size = new Size(100, 34);
             this._btnSave.TabIndex = 0;
             this._btnSave.Text = "保存配置";
-            this._btnSave.UseVisualStyleBackColor = true;
+            this._btnSave.FlatStyle = FlatStyle.Flat;
+            this._btnSave.FlatAppearance.BorderSize = 0;
+            this._btnSave.BackColor = _wordBlue;
+            this._btnSave.ForeColor = Color.White;
+            this._btnSave.Cursor = Cursors.Hand;
             this._btnSave.Click += new EventHandler(this.btnSave_Click);
 
             // 
@@ -72,12 +119,17 @@ namespace WordTool.UI
             // 
             this._btnCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             this._btnCancel.Font = mainFont;
-            this._btnCancel.Location = new Point(460, 9);
+            this._btnCancel.Location = new Point(460, 12);
             this._btnCancel.Name = "_btnCancel";
-            this._btnCancel.Size = new Size(100, 32);
+            this._btnCancel.Size = new Size(100, 34);
             this._btnCancel.TabIndex = 1;
             this._btnCancel.Text = "取消";
-            this._btnCancel.UseVisualStyleBackColor = true;
+            this._btnCancel.FlatStyle = FlatStyle.Flat;
+            this._btnCancel.FlatAppearance.BorderColor = _border;
+            this._btnCancel.FlatAppearance.BorderSize = 1;
+            this._btnCancel.BackColor = Color.White;
+            this._btnCancel.ForeColor = _wordBlueDark;
+            this._btnCancel.Cursor = Cursors.Hand;
             this._btnCancel.Click += new EventHandler(this.btnCancel_Click);
 
             // 
@@ -86,8 +138,8 @@ namespace WordTool.UI
             this._btnPanel.Controls.Add(this._btnSave);
             this._btnPanel.Controls.Add(this._btnCancel);
             this._btnPanel.Dock = DockStyle.Bottom;
-            this._btnPanel.Height = 50;
-            this._btnPanel.BackColor = Color.FromArgb(245, 245, 245);
+            this._btnPanel.Height = 58;
+            this._btnPanel.BackColor = _surface;
             this._btnPanel.Location = new Point(0, 640);
             this._btnPanel.Name = "_btnPanel";
             this._btnPanel.Padding = new Padding(5);
@@ -95,8 +147,9 @@ namespace WordTool.UI
             // 
             // TemplateEditorForm
             // 
-            this.ClientSize = new Size(580, 690);
+            this.ClientSize = new Size(600, 720);
             this.Controls.Add(this._propertyGrid);
+            this.Controls.Add(this._headerPanel);
             this.Controls.Add(this._btnPanel);
             this.Name = "TemplateEditorForm";
             this.Text = $"配置排版模板 - {EditingTemplate.Name}";
@@ -106,7 +159,8 @@ namespace WordTool.UI
             this.MinimizeBox = false;
             this.MaximizeBox = false;
             this.FormBorderStyle = FormBorderStyle.SizableToolWindow;
-            this.Font = mainFont; // 窗体默认字体
+            this.BackColor = _surface;
+            this.Font = mainFont;
             
             this.ResumeLayout(false);
         }
@@ -166,14 +220,18 @@ namespace WordTool.UI
                 ImageAlignment = original.ImageAlignment,
                 ImageSpaceBefore = original.ImageSpaceBefore,
                 ImageSpaceAfter = original.ImageSpaceAfter,
+                TableWidthPercent = original.TableWidthPercent > 0 ? original.TableWidthPercent : 100.0f,
                 TableAlignment = original.TableAlignment,
                 TableAutoFit = original.TableAutoFit,
                 TableThreeLine = original.TableThreeLine,
                 TableTopBottomBorderWidth = original.TableTopBottomBorderWidth,
+                TableTopBorderWidth = original.TableTopBorderWidth > 0 ? original.TableTopBorderWidth : (original.TableTopBottomBorderWidth > 0 ? original.TableTopBottomBorderWidth : 1.5f),
                 TableHeaderBottomBorderWidth = original.TableHeaderBottomBorderWidth,
+                TableBottomBorderWidth = original.TableBottomBorderWidth > 0 ? original.TableBottomBorderWidth : (original.TableTopBottomBorderWidth > 0 ? original.TableTopBottomBorderWidth : 1.5f),
                 TableHeaderBold = original.TableHeaderBold,
                 TableTextFontName = original.TableTextFontName,
                 TableTextSize = original.TableTextSize,
+                TableTextAlignment = original.TableTextAlignment,
                 TableTextLineSpacingRule = original.TableTextLineSpacingRule,
                 TableTextFirstLineIndentCm = original.TableTextFirstLineIndentCm,
                 TocLevels = original.TocLevels,

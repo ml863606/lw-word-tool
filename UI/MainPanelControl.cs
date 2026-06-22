@@ -17,10 +17,17 @@ namespace WordTool.UI
         private readonly object _logLock = new object();
         private readonly Queue<string> _pendingLogs = new Queue<string>();
         private Timer _logFlushTimer;
+        private readonly Color _wordBlue = Color.FromArgb(43, 87, 154);
+        private readonly Color _wordBlueDark = Color.FromArgb(31, 72, 136);
+        private readonly Color _surface = Color.FromArgb(248, 250, 252);
+        private readonly Color _border = Color.FromArgb(218, 225, 233);
+        private readonly Color _text = Color.FromArgb(31, 41, 55);
+        private readonly Color _mutedText = Color.FromArgb(99, 115, 129);
         
         public MainPanelControl()
         {
             InitializeComponent();
+            ApplyWordTheme();
             InitializeTemplates();
             this.cmbTemplate.SelectedIndexChanged += CmbTemplate_SelectedIndexChanged;
             InitializeLogBuffer();
@@ -58,6 +65,10 @@ namespace WordTool.UI
                         {
                             needReset = true;
                         }
+                        else
+                        {
+                            NormalizeLoadedTemplates();
+                        }
                     }
                     catch (Exception loadEx)
                     {
@@ -91,6 +102,32 @@ namespace WordTool.UI
             using (var reader = new StreamReader(_configPath))
             {
                 _templates = (List<FormattingTemplate>)serializer.Deserialize(reader);
+            }
+        }
+
+        private void NormalizeLoadedTemplates()
+        {
+            foreach (var template in _templates)
+            {
+                if (template.TableWidthPercent <= 0)
+                {
+                    template.TableWidthPercent = 100.0f;
+                }
+
+                if (template.TableTopBorderWidth <= 0)
+                {
+                    template.TableTopBorderWidth = template.TableTopBottomBorderWidth > 0 ? template.TableTopBottomBorderWidth : 1.5f;
+                }
+
+                if (template.TableHeaderBottomBorderWidth <= 0)
+                {
+                    template.TableHeaderBottomBorderWidth = 0.75f;
+                }
+
+                if (template.TableBottomBorderWidth <= 0)
+                {
+                    template.TableBottomBorderWidth = template.TableTopBottomBorderWidth > 0 ? template.TableTopBottomBorderWidth : 1.5f;
+                }
             }
         }
 
@@ -130,6 +167,106 @@ namespace WordTool.UI
             {
                 _workflow.Template = _templates[index];
             }
+        }
+
+        private void ApplyWordTheme()
+        {
+            this.BackColor = _surface;
+            this.Font = new Font("Microsoft YaHei UI", 9.0f);
+
+            panelTemplate.BackColor = Color.White;
+            panelTemplate.Padding = new Padding(12, 8, 12, 6);
+            panelTemplate.Height = 44;
+
+            lblTemplate.Text = "模板";
+            lblTemplate.Width = 46;
+            lblTemplate.ForeColor = _mutedText;
+            lblTemplate.Font = new Font("Microsoft YaHei UI", 9.0f, FontStyle.Regular);
+
+            cmbTemplate.FlatStyle = FlatStyle.Flat;
+            cmbTemplate.Font = new Font("Microsoft YaHei UI", 9.0f);
+            cmbTemplate.ForeColor = _text;
+            cmbTemplate.BackColor = Color.White;
+
+            StyleSecondaryButton(btnEditTemplate);
+            btnEditTemplate.Width = 64;
+
+            tabControl1.Font = new Font("Microsoft YaHei UI", 9.0f);
+            tabControl1.Height = 275;
+            tabPageAuto.BackColor = _surface;
+            tabPageManual.BackColor = _surface;
+            tabPageAuto.Padding = new Padding(12);
+            tabPageManual.Padding = new Padding(12);
+
+            StylePrimaryButton(btnRunAll);
+            btnRunAll.Height = 48;
+
+            StyleStepButton(btnClean);
+            StyleStepButton(btnStyle);
+            StyleStepButton(btnAnalyze);
+            StyleStepButton(btnImage);
+            StyleStepButton(btnTable);
+            StyleStepButton(btnLayout);
+
+            panelExecutionControl.BackColor = Color.White;
+            panelExecutionControl.Height = 46;
+            panelExecutionControl.Padding = new Padding(12, 8, 12, 8);
+            StyleSecondaryButton(btnPause);
+            StyleDangerButton(btnStop);
+
+            progressBar1.Height = 8;
+
+            txtLog.BorderStyle = BorderStyle.FixedSingle;
+            txtLog.BackColor = Color.White;
+            txtLog.ForeColor = Color.FromArgb(38, 50, 56);
+            txtLog.Font = new Font("Consolas", 9.0f);
+            txtLog.Margin = new Padding(12);
+        }
+
+        private void StylePrimaryButton(Button button)
+        {
+            button.FlatStyle = FlatStyle.Flat;
+            button.FlatAppearance.BorderSize = 0;
+            button.BackColor = _wordBlue;
+            button.ForeColor = Color.White;
+            button.Font = new Font("Microsoft YaHei UI", 9.5f, FontStyle.Bold);
+            button.Cursor = Cursors.Hand;
+            button.TextAlign = ContentAlignment.MiddleCenter;
+        }
+
+        private void StyleStepButton(Button button)
+        {
+            button.FlatStyle = FlatStyle.Flat;
+            button.FlatAppearance.BorderColor = _border;
+            button.FlatAppearance.BorderSize = 1;
+            button.FlatAppearance.MouseOverBackColor = Color.FromArgb(232, 240, 254);
+            button.FlatAppearance.MouseDownBackColor = Color.FromArgb(212, 227, 252);
+            button.BackColor = Color.White;
+            button.ForeColor = _text;
+            button.Font = new Font("Microsoft YaHei UI", 9.0f, FontStyle.Regular);
+            button.Height = 38;
+            button.Cursor = Cursors.Hand;
+            button.TextAlign = ContentAlignment.MiddleLeft;
+            button.Padding = new Padding(14, 0, 10, 0);
+        }
+
+        private void StyleSecondaryButton(Button button)
+        {
+            button.FlatStyle = FlatStyle.Flat;
+            button.FlatAppearance.BorderColor = _border;
+            button.FlatAppearance.BorderSize = 1;
+            button.FlatAppearance.MouseOverBackColor = Color.FromArgb(238, 244, 252);
+            button.FlatAppearance.MouseDownBackColor = Color.FromArgb(222, 235, 250);
+            button.BackColor = Color.White;
+            button.ForeColor = _wordBlueDark;
+            button.Font = new Font("Microsoft YaHei UI", 9.0f, FontStyle.Regular);
+            button.Cursor = Cursors.Hand;
+        }
+
+        private void StyleDangerButton(Button button)
+        {
+            StyleSecondaryButton(button);
+            button.ForeColor = Color.FromArgb(176, 48, 48);
         }
 
         private void btnEditTemplate_Click(object sender, EventArgs e)
@@ -219,7 +356,7 @@ namespace WordTool.UI
 
             if (!running)
             {
-                btnPause.Text = "⏸️ 暂停";
+                btnPause.Text = "暂停";
             }
         }
 
@@ -263,12 +400,12 @@ namespace WordTool.UI
             if (_workflow.IsPaused)
             {
                 _workflow.Resume();
-                btnPause.Text = "⏸️ 暂停";
+                btnPause.Text = "暂停";
             }
             else
             {
                 _workflow.Pause();
-                btnPause.Text = "▶️ 继续";
+                btnPause.Text = "继续";
             }
         }
 
@@ -412,7 +549,7 @@ namespace WordTool.UI
             });
         }
 
-        private void btnMedia_Click(object sender, EventArgs e)
+        private void btnImage_Click(object sender, EventArgs e)
         {
             SetExecutionState(true);
             _workflow?.ResetControlStates();
@@ -420,7 +557,24 @@ namespace WordTool.UI
             {
                 try
                 {
-                    _workflow?.RunMediaFormatting();
+                    _workflow?.RunImageFormatting();
+                }
+                finally
+                {
+                    SetExecutionState(false);
+                }
+            });
+        }
+
+        private void btnTable_Click(object sender, EventArgs e)
+        {
+            SetExecutionState(true);
+            _workflow?.ResetControlStates();
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    _workflow?.RunTableFormatting();
                 }
                 finally
                 {

@@ -46,13 +46,10 @@ namespace WordTool.Formatters
                 tableIndex++;
                 int cellCount = table.Range.Cells.Count;
 
-                // 设置自动调整
-                if (template.TableAutoFit)
-                {
-                    table.AutoFitBehavior(Word.WdAutoFitBehavior.wdAutoFitWindow);
-                }
+                float tableWidthPercent = GetTableWidthPercent(template);
+                ApplyTableWidth(table, tableWidthPercent);
                 table.Rows.Alignment = (Word.WdRowAlignment)template.TableAlignment;
-                logger?.Invoke($"【表格排版】第 {tableIndex} 个表格 -> {template.TableAlignment}，自动适应窗口: {YesNo(template.TableAutoFit)}，单元格数: {cellCount}");
+                logger?.Invoke($"【表格排版】第 {tableIndex} 个表格 -> 宽度 {tableWidthPercent:0.#}%，{template.TableAlignment}，单元格数: {cellCount}");
 
                 // 统计最大行索引以处理合并单元格情况
                 int maxRowIndex = 0;
@@ -80,6 +77,7 @@ namespace WordTool.Formatters
                     formattedCells++;
                     cell.Range.ParagraphFormat.FirstLineIndent = doc.Application.CentimetersToPoints(template.TableTextFirstLineIndentCm);
                     cell.Range.ParagraphFormat.LineSpacingRule = (Word.WdLineSpacing)template.TableTextLineSpacingRule;
+                    cell.Range.ParagraphFormat.Alignment = (Word.WdParagraphAlignment)template.TableTextAlignment;
                     
                     cell.Range.Font.NameFarEast = template.TableTextFontName;
                     cell.Range.Font.NameAscii = template.NormalFontNameAscii;
@@ -109,7 +107,7 @@ namespace WordTool.Formatters
                         {
                             // 标题行上边框
                             cell.Borders[Word.WdBorderType.wdBorderTop].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
-                            cell.Borders[Word.WdBorderType.wdBorderTop].LineWidth = GetWdLineWidth(template.TableTopBottomBorderWidth);
+                            cell.Borders[Word.WdBorderType.wdBorderTop].LineWidth = GetWdLineWidth(GetTopBorderWidth(template));
                             
                             // 标题行下边框（中间线）
                             cell.Borders[Word.WdBorderType.wdBorderBottom].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
@@ -119,28 +117,63 @@ namespace WordTool.Formatters
                         {
                             // 最底行下边框
                             cell.Borders[Word.WdBorderType.wdBorderBottom].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
-                            cell.Borders[Word.WdBorderType.wdBorderBottom].LineWidth = GetWdLineWidth(template.TableTopBottomBorderWidth);
+                            cell.Borders[Word.WdBorderType.wdBorderBottom].LineWidth = GetWdLineWidth(GetBottomBorderWidth(template));
                         }
                     }
                 }
 
-                logger?.Invoke($"【表格排版】第 {tableIndex} 个表格 -> 已格式化 {formattedCells} 个单元格；正文 {template.TableTextFontName}/{template.NormalFontNameAscii} {template.TableTextSize:0.#}pt，{template.TableTextLineSpacingRule}，首行缩进 {template.TableTextFirstLineIndentCm:0.##}cm，标题行{BoldText(template.TableHeaderBold)}");
+                logger?.Invoke($"【表格排版】第 {tableIndex} 个表格 -> 已格式化 {formattedCells} 个单元格；正文 {template.TableTextFontName}/{template.NormalFontNameAscii} {template.TableTextSize:0.#}pt，{template.TableTextAlignment}，{template.TableTextLineSpacingRule}，首行缩进 {template.TableTextFirstLineIndentCm:0.##}cm，标题行{BoldText(template.TableHeaderBold)}");
 
                 if (template.TableThreeLine)
                 {
-                    logger?.Invoke($"【表格排版】第 {tableIndex} 个表格 -> 三线表完成：上下边框 {template.TableTopBottomBorderWidth:0.##}pt，标题行下边框 {template.TableHeaderBottomBorderWidth:0.##}pt");
+                    logger?.Invoke($"【表格排版】第 {tableIndex} 个表格 -> 三线表完成：上 {GetTopBorderWidth(template):0.##}，中 {template.TableHeaderBottomBorderWidth:0.##}，下 {GetBottomBorderWidth(template):0.##}");
                 }
             }
         }
 
-        private string YesNo(bool value)
+        private void ApplyTableWidth(Word.Table table, float widthPercent)
         {
-            return value ? "是" : "否";
+            try
+            {
+                if (widthPercent >= 99.9f)
+                {
+                    table.AutoFitBehavior(Word.WdAutoFitBehavior.wdAutoFitWindow);
+                }
+                else
+                {
+                    table.AutoFitBehavior(Word.WdAutoFitBehavior.wdAutoFitFixed);
+                }
+
+                table.PreferredWidthType = Word.WdPreferredWidthType.wdPreferredWidthPercent;
+                table.PreferredWidth = widthPercent;
+            }
+            catch { }
         }
 
         private string BoldText(bool isBold)
         {
             return isBold ? "加粗" : "不加粗";
+        }
+
+        private float GetTableWidthPercent(FormattingTemplate template)
+        {
+            if (template.TableWidthPercent <= 0) return 100.0f;
+            if (template.TableWidthPercent > 100.0f) return 100.0f;
+            return template.TableWidthPercent;
+        }
+
+        private float GetTopBorderWidth(FormattingTemplate template)
+        {
+            if (template.TableTopBorderWidth > 0) return template.TableTopBorderWidth;
+            if (template.TableTopBottomBorderWidth > 0) return template.TableTopBottomBorderWidth;
+            return 1.5f;
+        }
+
+        private float GetBottomBorderWidth(FormattingTemplate template)
+        {
+            if (template.TableBottomBorderWidth > 0) return template.TableBottomBorderWidth;
+            if (template.TableTopBottomBorderWidth > 0) return template.TableTopBottomBorderWidth;
+            return 1.5f;
         }
 
         private Word.WdLineWidth GetWdLineWidth(float width)

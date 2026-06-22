@@ -33,6 +33,7 @@ namespace WordTool.Styles
             logger?.Invoke($"【样式重建】参考文献_Auto -> {template.RefFontSize:0.#}pt，首行缩进 {template.RefFirstLineIndentCm:0.##}cm，左缩进 {template.RefLeftIndentCm:0.##}cm");
             logger?.Invoke($"【样式重建】题注 -> 宋体/Times New Roman {template.CaptionFontSize:0.#}pt，{BoldText(template.CaptionBold)}，{template.CaptionAlignment}");
             logger?.Invoke($"【样式重建】表注_Auto -> {template.NoteFontNameFarEast}/{template.NormalFontNameAscii} {template.NoteFontSize:0.#}pt，{template.NoteAlignment}");
+            logger?.Invoke($"【表格样式】宽度 {GetTableWidthPercent(template):0.#}%，表格{template.TableAlignment}；单元格文字 {template.TableTextFontName}/{template.NormalFontNameAscii} {template.TableTextSize:0.#}pt，{template.TableTextAlignment}；三线表 上 {GetTopBorderWidth(template):0.##} / 中 {template.TableHeaderBottomBorderWidth:0.##} / 下 {GetBottomBorderWidth(template):0.##}");
         }
 
         private void SetupPage(Word.Document doc, FormattingTemplate template)
@@ -169,6 +170,27 @@ namespace WordTool.Styles
         private string BoldText(bool isBold)
         {
             return isBold ? "加粗" : "不加粗";
+        }
+
+        private float GetTableWidthPercent(FormattingTemplate template)
+        {
+            if (template.TableWidthPercent <= 0) return 100.0f;
+            if (template.TableWidthPercent > 100.0f) return 100.0f;
+            return template.TableWidthPercent;
+        }
+
+        private float GetTopBorderWidth(FormattingTemplate template)
+        {
+            if (template.TableTopBorderWidth > 0) return template.TableTopBorderWidth;
+            if (template.TableTopBottomBorderWidth > 0) return template.TableTopBottomBorderWidth;
+            return 1.5f;
+        }
+
+        private float GetBottomBorderWidth(FormattingTemplate template)
+        {
+            if (template.TableBottomBorderWidth > 0) return template.TableBottomBorderWidth;
+            if (template.TableTopBottomBorderWidth > 0) return template.TableTopBottomBorderWidth;
+            return 1.5f;
         }
     }
 }
